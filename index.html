@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>focu5 🚀</title>
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Babel Standalone CDN (for JSX in browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': {
+                            light: '#67e8f9', // cyan-300
+                            DEFAULT: '#06b6d4', // cyan-500
+                            dark: '#0891b2', // cyan-600
+                            darker: '#0e7490', // cyan-700
+                        },
+                        'secondary': '#64748b', // slate-500
+                        'accent': '#f59e0b', // amber-500
+                        'danger': '#ef4444', // red-500
+                        'success': '#22c55e', // green-500
+                        'warning': '#f59e0b', // amber-500 (using accent)
+                        'info': '#3b82f6', // blue-500
+                        'background': '#f8fafc', // slate-50 (very light grey/off-white)
+                        'card': '#ffffff', // white
+                        'card-alt': '#f1f5f9', // slate-100 (slightly grey card bg)
+                        'text-main': '#1e293b', // slate-800
+                        'text-muted': '#64748b', // slate-500
+                        'text-light': '#f8fafc', // slate-50 (for dark backgrounds)
+                        'border-color': '#e2e8f0', // slate-200 (lighter border)
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'subtle': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
+                        'medium': '0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07)', // Softer shadow
+                        'lg': '0 15px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08)', // Slightly larger soft shadow
+                    },
+                    borderRadius: {
+                        'xl': '0.75rem', // 12px
+                        '2xl': '1rem', // 16px
+                    },
+                    transitionProperty: {
+                        'height': 'height',
+                        'spacing': 'margin, padding',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Font & Basic Custom Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: tailwind.config.theme.extend.colors.background;
+            color: tailwind.config.theme.extend.colors['text-main'];
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* General transitions */
+        button, input, textarea, select, .task-item, .goal-display {
+            transition: all 0.2s ease-in-out;
+        }
+        .task-item.completed span {
+             text-decoration: line-through;
+             color: #94a3b8; /* slate-400 */
+        }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; } /* slate-100 */
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; } /* slate-300 */
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; } /* slate-400 */
+
+        /* Settings Panel Animation */
+        .settings-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-bottom: 0;
+            border-top: 0px solid transparent; /* Prepare for transition */
+        }
+        .settings-panel.open {
+             max-height: 300px; /* Adjust if more settings are added */
+             padding-top: 1rem; /* pt-4 */
+             padding-bottom: 1rem; /* pb-4 */
+             margin-top: 1rem; /* mt-4 */
+             margin-bottom: 1rem; /* mb-4 */
+             border-top: 1px solid tailwind.config.theme.extend.colors['border-color']; /* Add separator line */
+             transition: max-height 0.4s ease-in, padding 0.4s ease-in, margin 0.4s ease-in, border-top 0.4s ease-in;
+        }
+
+         /* Focus mode message styling */
+         .focus-mode-indicator {
+            background-color: rgba(245, 158, 11, 0.1); /* amber-500 with alpha */
+            border-left: 4px solid #f59e0b; /* amber-500 */
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            margin-top: 1rem; /* mt-4 */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: opacity 0.3s ease-in-out;
+         }
+          /* Input focus state */
+        input[type="text"]:focus, input[type="number"]:focus, input[type="url"]:focus, textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            border-color: tailwind.config.theme.extend.colors.primary.DEFAULT;
+            box-shadow: 0 0 0 2px tailwind.config.theme.extend.colors.primary.light;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState, useEffect, useCallback, useRef } = React;
+
+        // --- Constants & Initial Settings ---
+        const DEFAULT_WORK_MINUTES = 25;
+        const DEFAULT_SHORT_BREAK_MINUTES = 5;
+        const DEFAULT_LONG_BREAK_MINUTES = 15;
+        const SESSIONS_BEFORE_LONG_BREAK = 4;
+
+        const quotes = [
+             { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
+             { text: "Success is not final, failure is not fatal: It is the courage to continue that counts.", author: "Winston Churchill" },
+             { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+             { text: "The best way to predict the future is to create it.", author: "Peter Drucker" },
+             { text: "Don't let yesterday take up too much of today.", author: "Will Rogers" },
+             { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+             { text: "Focus on the step in front of you, not the whole staircase.", author: "Unknown" },
+             { text: "Small progress is still progress.", author: "Unknown" }
+        ];
+
+        // --- Helper Functions ---
+        const formatTime = (seconds) => {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        };
+
+        // Custom Hook for Local Storage
+        const useLocalStorage = (key, initialValue) => {
+            const [storedValue, setStoredValue] = useState(() => {
+                try {
+                    const item = window.localStorage.getItem(key);
+                    return item ? JSON.parse(item) : initialValue;
+                } catch (error) {
+                    console.error("Error reading localStorage key “"+key+"”:", error);
+                    return initialValue;
+                }
+            });
+
+            const setValue = (value) => {
+                try {
+                    const valueToStore = value instanceof Function ? value(storedValue) : value;
+                    setStoredValue(valueToStore);
+                    window.localStorage.setItem(key, JSON.stringify(valueToStore));
+                } catch (error) {
+                    console.error("Error setting localStorage key “"+key+"”:", error);
+                }
+            };
+            return [storedValue, setValue];
+        };
+
+        // --- Components ---
+
+        // 1. Pomodoro Timer Component (Continuing from previous)
+        function PomodoroTimer() {
+            const [settings, setSettings] = useLocalStorage('pomodoroSettings_v2', {
+                work: DEFAULT_WORK_MINUTES,
+                shortBreak: DEFAULT_SHORT_BREAK_MINUTES,
+                longBreak: DEFAULT_LONG_BREAK_MINUTES,
+            });
+            const [mode, setMode] = useState('work');
+            const [sessionCount, setSessionCount] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(settings.work * 60);
+            const [isRunning, setIsRunning] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+            const [tempSettings, setTempSettings] = useState(settings);
+
+            const timerRef = useRef(null);
+
+            const getTimeForMode = useCallback((currentMode) => {
+                switch (currentMode) {
+                    case 'shortBreak': return settings.shortBreak * 60;
+                    case 'longBreak': return settings.longBreak * 60;
+                    case 'work':
+                    default: return settings.work * 60;
+                }
+            }, [settings]);
+
+            useEffect(() => {
+                if (!isRunning) {
+                    setTimeLeft(getTimeForMode(mode));
+                }
+            }, [settings, mode, isRunning, getTimeForMode]);
+
+            useEffect(() => {
+                if (isRunning && timeLeft > 0) {
+                    timerRef.current = setInterval(() => {
+                        setTimeLeft(prevTime => Math.max(0, prevTime - 1));
+                    }, 1000);
+                } else if (timeLeft === 0 && isRunning) {
+                    clearInterval(timerRef.current);
+                    setIsRunning(false);
+
+                    try { /* Audio Notification */
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain();
+                        oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.8);
+                        oscillator.connect(gainNode); gainNode.connect(audioContext.destination); oscillator.start(); oscillator.stop(audioContext.currentTime + 0.8);
+                    } catch (e) { console.warn("Audio notification failed:", e); }
+
+                    let nextMode = ''; let nextSessionCount = sessionCount;
+                    if (mode === 'work') {
+                        nextSessionCount++;
+                        nextMode = (nextSessionCount > 0 && nextSessionCount % SESSIONS_BEFORE_LONG_BREAK === 0) ? 'longBreak' : 'shortBreak';
+                    } else { nextMode = 'work'; }
+                    setSessionCount(nextSessionCount); setMode(nextMode);
+                    setTimeLeft(getTimeForMode(nextMode)); // Set time for next mode
+
+                    const modeName = nextMode === 'work' ? 'Work Session' : nextMode === 'shortBreak' ? 'Short Break' : 'Long Break';
+                    if (Notification.permission === "granted") { /* Browser Notification */
+                        new Notification("Pomodoro Complete!", { body: `Time for your ${modeName}.`, icon: "https://img.icons8.com/fluency/48/timer.png", });
+                    } else {
+                        alert(`Time for your ${modeName}!`);
+                        if (Notification.permission === "default") { Notification.requestPermission(); }
+                    }
+                }
+                return () => clearInterval(timerRef.current);
+            }, [isRunning, timeLeft, mode, sessionCount, getTimeForMode, settings]);
+
+            const toggleTimer = () => setIsRunning(!isRunning);
+            const resetTimer = () => { clearInterval(timerRef.current); setIsRunning(false); setTimeLeft(getTimeForMode(mode)); };
+            const skipSession = () => {
+                clearInterval(timerRef.current); setIsRunning(false); let nextMode = ''; let nextSessionCount = sessionCount;
+                if (mode === 'work') { nextSessionCount++; nextMode = (nextSessionCount > 0 && nextSessionCount % SESSIONS_BEFORE_LONG_BREAK === 0) ? 'longBreak' : 'shortBreak'; }
+                else { nextMode = 'work'; }
+                setSessionCount(nextSessionCount); setMode(nextMode); setTimeLeft(getTimeForMode(nextMode));
+            };
+            const handleSettingsChange = (e) => { const { name, value } = e.target; const intValue = Math.max(1, parseInt(value, 10) || 1); setTempSettings(prev => ({ ...prev, [name]: intValue })); };
+            const saveSettings = (e) => { e.preventDefault(); setSettings(tempSettings); setShowSettings(false); if (!isRunning) { setTimeLeft(getTimeForMode(mode)); } };
+
+            const getModeStyling = () => { // Finish this function
+                 switch(mode) {
+                    case 'shortBreak': return { name: 'Short Break', bg: 'bg-green-100', text: 'text-green-700', border: 'border-success' };
+                    case 'longBreak': return { name: 'Long Break', bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-info' }; // Changed to info blue
+                    case 'work':
+                    default: return { name: 'Focus Session', bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-warning' }; // Changed text
+                 }
+            };
+            const modeStyle = getModeStyling();
+
+            return (
+                <div className={`bg-card p-6 rounded-xl shadow-lg border-t-4 ${modeStyle.border}`}>
+                    {/* Header */}
+                    <div className={`flex justify-between items-center mb-4`}>
+                         <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${modeStyle.bg} ${modeStyle.text}`}>
+                              {modeStyle.name}
+                        </span>
+                        <button
+                            onClick={() => setShowSettings(!showSettings)}
+                            className="text-secondary hover:text-primary p-1 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2"
+                            title="Timer Settings"
+                            aria-label="Timer Settings"
+                        >
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.004.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 1.905c-.007.378.138.75.431.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.293-.24.438-.613.431-.992a6.759 6.759 0 0 1 0-1.905c.007-.378-.138-.75-.431-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                           </svg>
+                        </button>
+                    </div>
+
+                    {/* Settings Panel */}
+                     <div className={`settings-panel ${showSettings ? 'open' : ''}`}>
+                        <form onSubmit={saveSettings} className="space-y-3">
+                            <p className="text-sm font-medium text-text-main mb-2">Timer Durations (minutes):</p>
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label htmlFor="work" className="block text-xs font-medium text-text-muted mb-1">Focus</label>
+                                    <input type="number" id="work" name="work" min="1" value={tempSettings.work} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
+                                </div>
+                                <div>
+                                     <label htmlFor="shortBreak" className="block text-xs font-medium text-text-muted mb-1">Short Br.</label>
+                                    <input type="number" id="shortBreak" name="shortBreak" min="1" value={tempSettings.shortBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
+                                </div>
+                                <div>
+                                     <label htmlFor="longBreak" className="block text-xs font-medium text-text-muted mb-1">Long Br.</label>
+                                    <input type="number" id="longBreak" name="longBreak" min="1" value={tempSettings.longBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
+                                </div>
+                            </div>
+                            <div className="flex justify-end">
+                                <button type="submit" className="px-4 py-1.5 bg-success hover:bg-green-600 text-white text-sm font-medium rounded-md shadow-subtle">Save Settings</button>
+                            </div>
+                        </form>
+                     </div>
+
+                    {/* Timer Display & Controls */}
+                    <div className="text-center">
+                        <p className="text-7xl md:text-8xl font-bold text-primary-dark mb-6">{formatTime(timeLeft)}</p>
+                        <div className="flex justify-center space-x-3 sm:space-x-4">
+                            <button
+                                onClick={toggleTimer}
+                                className={`px-6 py-2.5 rounded-lg font-semibold text-white text-base shadow-medium w-28 text-center ${isRunning ? 'bg-danger hover:bg-red-600' : 'bg-primary hover:bg-primary-dark'}`}
+                            >
+                                {isRunning ? 'Pause' : 'Start'}
+                            </button>
+                            <button
+                                onClick={resetTimer}
+                                className="px-6 py-2.5 rounded-lg font-semibold bg-secondary hover:bg-slate-600 text-white text-base shadow-medium"
+                            >
+                                Reset
+                            </button>
+                             <button
+                                onClick={skipSession}
+                                title="Skip to next session"
+                                className="px-4 py-2.5 rounded-lg font-semibold bg-accent hover:bg-amber-600 text-white text-base shadow-medium"
+                            >
+                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 inline-block -mr-1">
+                                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                               </svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 inline-block -ml-2">
+                                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                               </svg>
+                            </button>
+                        </div>
+                         <p className="text-sm text-text-muted mt-6">Sessions Completed: <span className="font-semibold text-primary-darker">{Math.floor(sessionCount / 1)}</span></p>
+                    </div>
+                </div>
+            );
+        }
+
+        // 2. Session Goal Component
+        function SessionGoal() {
+            const [goal, setGoal] = useLocalStorage('sessionGoal_v1', '');
+            const [isEditing, setIsEditing] = useState(false);
+            const [tempGoal, setTempGoal] = useState(goal);
+
+            const handleEdit = () => {
+                setTempGoal(goal); // Load current goal into temp state for editing
+                setIsEditing(true);
+            };
+
+            const handleSave = () => {
+                setGoal(tempGoal.trim());
+                setIsEditing(false);
+            };
+
+            const handleCancel = () => {
+                setIsEditing(false);
+                 // No need to reset tempGoal here, it resets on next edit
+            };
+
+             const handleKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    handleSave();
+                } else if (e.key === 'Escape') {
+                    handleCancel();
+                }
+            };
+
+
+            return (
+                 <div className="bg-card p-6 rounded-xl shadow-lg">
+                     <h2 className="text-lg font-semibold text-text-main mb-3 flex items-center justify-between">
+                         <span>🎯 Session Goal</span>
+                         {!isEditing && goal && (
+                              <button
+                                onClick={handleEdit}
+                                className="text-xs font-medium text-primary hover:text-primary-dark focus:outline-none"
+                            >
+                                Edit
+                            </button>
+                         )}
+                     </h2>
+                     {isEditing ? (
+                         <div className="space-y-3">
+                             <input
+                                type="text"
+                                value={tempGoal}
+                                onChange={(e) => setTempGoal(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="What's your main focus?"
+                                className="w-full border border-border-color rounded px-3 py-2 text-sm"
+                                autoFocus
+                             />
+                             <div className="flex justify-end space-x-2">
+                                 <button
+                                     onClick={handleCancel}
+                                     className="px-3 py-1 text-xs font-medium text-secondary hover:text-text-main rounded bg-slate-100 hover:bg-slate-200"
+                                 >
+                                     Cancel
+                                 </button>
+                                 <button
+                                     onClick={handleSave}
+                                     className="px-3 py-1 text-xs font-medium text-white bg-success hover:bg-green-600 rounded shadow-subtle"
+                                 >
+                                     Save Goal
+                                 </button>
+                             </div>
+                         </div>
+                     ) : (
+                         goal ? (
+                             <p className="text-text-muted text-base goal-display cursor-pointer hover:text-text-main" onClick={handleEdit} title="Click to edit">
+                                 {goal}
+                             </p>
+                         ) : (
+                             <button
+                                onClick={handleEdit}
+                                className="w-full text-left p-3 bg-primary-light/20 hover:bg-primary-light/40 text-primary-darker rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                             >
+                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                 </svg>
+                                Set your focus for this session
+                             </button>
+                         )
+                     )}
+                 </div>
+             );
+        }
+
+
+        // 3. To-Do List Component
+        function TodoList() {
+            const [tasks, setTasks] = useLocalStorage('focusDashboardTasks_v2', []);
+            const [newTaskText, setNewTaskText] = useState('');
+
+            const addTask = (e) => {
+                e.preventDefault();
+                if (newTaskText.trim() === '') return;
+                const newTask = { id: Date.now(), text: newTaskText.trim(), completed: false };
+                setTasks(prevTasks => [newTask, ...prevTasks]); // Add new tasks to the top
+                setNewTaskText('');
+            };
+
+            const toggleTask = (id) => {
+                setTasks(prevTasks =>
+                    prevTasks.map(task =>
+                        task.id === id ? { ...task, completed: !task.completed } : task
+                    )
+                );
+            };
+
+            const deleteTask = (id) => {
+                setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+            };
+
+            const clearCompleted = () => {
+                setTasks(prevTasks => prevTasks.filter(task => !task.completed));
+            };
+
+            const completedCount = tasks.filter(t => t.completed).length;
+            const pendingCount = tasks.length - completedCount;
+
+            return (
+                <div className="bg-card p-6 rounded-xl shadow-lg flex flex-col"> {/* Removed h-full */}
+                    <div className="flex justify-between items-center mb-4">
+                         <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
+                           ✅ To-Do List
+                        </h2>
+                        {tasks.length > 0 && (
+                             <span className="text-xs font-medium text-secondary">{pendingCount} pending</span>
+                        )}
+                    </div>
+                    <form onSubmit={addTask} className="flex mb-4">
+                        <input
+                            type="text"
+                            value={newTaskText}
+                            onChange={(e) => setNewTaskText(e.target.value)}
+                            placeholder="Add a new task..."
+                            className="flex-grow border border-border-color rounded-l-md px-3 py-2 text-sm"
+                        />
+                        <button
+                            type="submit"
+                            className="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-r-md text-sm shadow-subtle"
+                        >
+                            Add
+                        </button>
+                    </form>
+                    <ul className="space-y-2 flex-grow overflow-y-auto pr-1 min-h-[200px] max-h-[40vh] mb-4"> {/* Max height + Scroll */}
+                        {tasks.length === 0 && (
+                             <p className="text-text-muted text-center py-8 text-sm">List is empty. Add tasks above!</p>
+                        )}
+                        {tasks.map(task => (
+                            <li key={task.id} className={`task-item flex items-center justify-between p-3 rounded-md bg-card-alt hover:bg-slate-200 ${task.completed ? 'opacity-60' : ''}`}>
+                                <div className="flex items-center space-x-3 overflow-hidden mr-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={task.completed}
+                                        onChange={() => toggleTask(task.id)}
+                                        className="form-checkbox flex-shrink-0 h-5 w-5 text-primary rounded focus:ring-primary-light border-slate-400 cursor-pointer"
+                                    />
+                                    <span className={`text-text-main text-sm ${task.completed ? 'line-through text-text-muted' : ''}`}>
+                                        {task.text}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => deleteTask(task.id)}
+                                    className="text-danger hover:text-red-700 font-semibold text-xs opacity-50 hover:opacity-100 flex-shrink-0 ml-2"
+                                    aria-label="Delete task"
+                                >
+                                    ✕
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                    {completedCount > 0 && (
+                         <div className="mt-auto text-right border-t border-border-color pt-3"> {/* Push to bottom */}
+                             <button
+                                onClick={clearCompleted}
+                                className="text-xs font-medium text-secondary hover:text-danger"
+                             >
+                                Clear {completedCount} Completed Task{completedCount > 1 ? 's' : ''}
+                            </button>
+                         </div>
+                    )}
+                </div>
+            );
+        }
+
+        // 4. Quick Notes Component
+        function QuickNotes() {
+            const [notes, setNotes] = useLocalStorage('focusDashboardNotes_v2', '');
+
+            return (
+                <div className="bg-card p-6 rounded-xl shadow-lg">
+                    <h2 className="text-lg font-semibold text-text-main mb-3 flex items-center gap-2">
+                        📝 Quick Notes
+                    </h2>
+                    <textarea
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Jot down quick thoughts or ideas here..."
+                        className="w-full h-36 border border-border-color rounded-md p-3 text-sm resize-none"
+                        aria-label="Quick Notes"
+                    />
+                     <p className="text-xs text-text-muted mt-2 text-right italic">Notes are saved automatically.</p>
+                </div>
+            );
+        }
+
+
+        // 5. Motivational Quote Component
+        function MotivationalQuote() {
+            const [quote, setQuote] = useState(null);
+
+            useEffect(() => {
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                setQuote(quotes[randomIndex]);
+            }, []);
+
+            if (!quote) return null;
+
+            return (
+                <div className="bg-gradient-to-r from-primary-dark to-primary-darker p-6 rounded-xl shadow-lg text-white text-center">
+                    <blockquote className="text-lg italic mb-2">"{quote.text}"</blockquote>
+                    <cite className="text-sm opacity-70">- {quote.author}</cite>
+                </div>
+            );
+        }
+
+        // --- Main App Component ---
+        function App() {
+            const [isFocusMode, setIsFocusMode] = useLocalStorage('focusDashboardFocusMode_v1', false);
+
+            const toggleFocusMode = () => setIsFocusMode(prev => !prev);
+
+            // Request notification permission on initial load if needed
+             useEffect(() => {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    // Consider adding a small, non-intrusive button/message asking the user first
+                    // before calling requestPermission() directly on load.
+                    // Example: console.log("Notifications available. Ask user if they want alerts.");
+                }
+            }, []);
+
+
+            return (
+                <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+                    <header className="max-w-7xl mx-auto mb-8 md:mb-12 flex flex-col sm:flex-row justify-between items-center gap-4">
+                         <div>
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-darker text-center sm:text-left">
+                               🚀 focu5
+                            </h1>
+                            <p className="text-secondary text-sm sm:text-base mt-1 text-center sm:text-left">Your dedicated space for productivity.</p>
+                         </div>
+                         <button
+                             onClick={toggleFocusMode}
+                             title={isFocusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
+                             className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-medium whitespace-nowrap ${isFocusMode ? 'bg-accent text-white hover:bg-amber-600' : 'bg-card text-secondary hover:bg-slate-100 border border-border-color'}`}
+                         >
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                             </svg>
+                            {isFocusMode ? 'Standard View' : 'Focus Mode'} {/* Changed label */}
+                         </button>
+                    </header>
+
+                    <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+
+                        {/* Column 1 */}
+                        <div className="space-y-6 md:space-y-8">
+                            <PomodoroTimer />
+                            {!isFocusMode && <SessionGoal />}
+                        </div>
+
+                        {/* Column 2 */}
+                        <div className="space-y-6 md:space-y-8">
+                             <TodoList />
+                            {!isFocusMode && <QuickNotes />}
+                        </div>
+
+                        {/* Full width bottom section */}
+                        <div className="lg:col-span-2 mt-2">
+                            {isFocusMode ? (
+                                <div className="focus-mode-indicator text-center text-sm font-medium text-amber-700">
+                                     🎯 Focus Mode Active: Minimal interface for concentration.
+                                </div>
+                            ) : (
+                                <MotivationalQuote />
+                            )}
+                        </div>
+
+                    </main>
+
+                    <footer className="text-center text-text-muted mt-16 text-xs sm:text-sm">
+                        <p>© {new Date().getFullYear()} focu5. Keep up the great work!</p>
+                        <p className="mt-1">Data is stored locally in your browser via localStorage.</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        // --- Render the App ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App)); // Use React.createElement for robustness
+
+    </script>
+
+</body>
+</html>
