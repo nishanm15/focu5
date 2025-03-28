@@ -52,7 +52,14 @@
                     transitionProperty: {
                         'height': 'height',
                         'spacing': 'margin, padding',
-                    }
+                    },
+                     // Add responsive text sizes for fullscreen timer
+                    fontSize: {
+                        '10xl': '10rem',
+                        '12xl': '12rem',
+                        '14xl': '14rem',
+                        '16xl': '16rem',
+                    },
                 }
             }
         }
@@ -117,8 +124,6 @@
             border-color: tailwind.config.theme.extend.colors.primary.DEFAULT;
             box-shadow: 0 0 0 2px tailwind.config.theme.extend.colors.primary.light;
         }
-
-
     </style>
 </head>
 <body>
@@ -178,8 +183,9 @@
 
         // --- Components ---
 
-        // 1. Pomodoro Timer Component (Continuing from previous)
-        function PomodoroTimer() {
+        // 1. Pomodoro Timer Component
+        // Added isFullscreen and onToggleFullscreen props
+        function PomodoroTimer({ isFullscreen, onToggleFullscreen }) {
             const [settings, setSettings] = useLocalStorage('pomodoroSettings_v2', {
                 work: DEFAULT_WORK_MINUTES,
                 shortBreak: DEFAULT_SHORT_BREAK_MINUTES,
@@ -207,8 +213,13 @@
                 if (!isRunning) {
                     setTimeLeft(getTimeForMode(mode));
                 }
-            }, [settings, mode, isRunning, getTimeForMode]);
+                 // If settings change while timer is paused, update the displayed time
+                if (!isRunning && !isFullscreen) { // Don't reset time if entering/exiting fullscreen paused
+                    setTimeLeft(getTimeForMode(mode));
+                }
+            }, [settings, mode, getTimeForMode]); // Removed isRunning dependency to allow settings update while paused
 
+             // Separate useEffect for timer logic
             useEffect(() => {
                 if (isRunning && timeLeft > 0) {
                     timerRef.current = setInterval(() => {
@@ -242,7 +253,7 @@
                     }
                 }
                 return () => clearInterval(timerRef.current);
-            }, [isRunning, timeLeft, mode, sessionCount, getTimeForMode, settings]);
+            }, [isRunning, timeLeft, mode, sessionCount, getTimeForMode, settings]); // Keep dependencies here
 
             const toggleTimer = () => setIsRunning(!isRunning);
             const resetTimer = () => { clearInterval(timerRef.current); setIsRunning(false); setTimeLeft(getTimeForMode(mode)); };
@@ -255,64 +266,106 @@
             const handleSettingsChange = (e) => { const { name, value } = e.target; const intValue = Math.max(1, parseInt(value, 10) || 1); setTempSettings(prev => ({ ...prev, [name]: intValue })); };
             const saveSettings = (e) => { e.preventDefault(); setSettings(tempSettings); setShowSettings(false); if (!isRunning) { setTimeLeft(getTimeForMode(mode)); } };
 
-            const getModeStyling = () => { // Finish this function
+            const getModeStyling = () => {
                  switch(mode) {
                     case 'shortBreak': return { name: 'Short Break', bg: 'bg-green-100', text: 'text-green-700', border: 'border-success' };
-                    case 'longBreak': return { name: 'Long Break', bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-info' }; // Changed to info blue
+                    case 'longBreak': return { name: 'Long Break', bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-info' };
                     case 'work':
-                    default: return { name: 'Focus Session', bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-warning' }; // Changed text
+                    default: return { name: 'Focus Session', bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-warning' };
                  }
             };
             const modeStyle = getModeStyling();
 
             return (
-                <div className={`bg-card p-6 rounded-xl shadow-lg border-t-4 ${modeStyle.border}`}>
-                    {/* Header */}
-                    <div className={`flex justify-between items-center mb-4`}>
-                         <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${modeStyle.bg} ${modeStyle.text}`}>
-                              {modeStyle.name}
-                        </span>
-                        <button
-                            onClick={() => setShowSettings(!showSettings)}
-                            className="text-secondary hover:text-primary p-1 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2"
-                            title="Timer Settings"
-                            aria-label="Timer Settings"
-                        >
-                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.004.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 1.905c-.007.378.138.75.431.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.293-.24.438-.613.431-.992a6.759 6.759 0 0 1 0-1.905c.007-.378-.138-.75-.431-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                           </svg>
-                        </button>
-                    </div>
+                 // Conditional wrapper styling based on fullscreen state
+                <div className={`${!isFullscreen ? `bg-card p-6 rounded-xl shadow-lg border-t-4 ${modeStyle.border}` : 'w-full h-full flex flex-col items-center justify-center relative'}`}>
 
-                    {/* Settings Panel */}
-                     <div className={`settings-panel ${showSettings ? 'open' : ''}`}>
-                        <form onSubmit={saveSettings} className="space-y-3">
-                            <p className="text-sm font-medium text-text-main mb-2">Timer Durations (minutes):</p>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div>
-                                    <label htmlFor="work" className="block text-xs font-medium text-text-muted mb-1">Focus</label>
-                                    <input type="number" id="work" name="work" min="1" value={tempSettings.work} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
-                                </div>
-                                <div>
-                                     <label htmlFor="shortBreak" className="block text-xs font-medium text-text-muted mb-1">Short Br.</label>
-                                    <input type="number" id="shortBreak" name="shortBreak" min="1" value={tempSettings.shortBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
-                                </div>
-                                <div>
-                                     <label htmlFor="longBreak" className="block text-xs font-medium text-text-muted mb-1">Long Br.</label>
-                                    <input type="number" id="longBreak" name="longBreak" min="1" value={tempSettings.longBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
-                                </div>
+                    {/* Header - Only shown when NOT fullscreen */}
+                    {!isFullscreen && (
+                        <div className={`flex justify-between items-center mb-4`}>
+                            {/* Mode Badge */}
+                            <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${modeStyle.bg} ${modeStyle.text}`}>
+                                {modeStyle.name}
+                            </span>
+                            {/* Settings and Fullscreen Buttons */}
+                            <div className="flex items-center gap-2">
+                                {/* Fullscreen Button (Enter) */}
+                                <button
+                                    onClick={onToggleFullscreen}
+                                    className="text-secondary hover:text-primary p-1 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2"
+                                    title="Fullscreen Timer" aria-label="Fullscreen Timer"
+                                >
+                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m4.5 4.5h-4.5m4.5 0v4.5m0-4.5L15 15" />
+                                     </svg>
+                                </button>
+                                {/* Settings Button */}
+                                <button
+                                    onClick={() => setShowSettings(!showSettings)}
+                                    className="text-secondary hover:text-primary p-1 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2"
+                                    title="Timer Settings" aria-label="Timer Settings"
+                                >
+                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.004.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 1.905c-.007.378.138.75.431.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.293-.24.438.613.431-.992a6.759 6.759 0 0 1 0-1.905c.007-.378-.138-.75-.431-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                   </svg>
+                                </button>
                             </div>
-                            <div className="flex justify-end">
-                                <button type="submit" className="px-4 py-1.5 bg-success hover:bg-green-600 text-white text-sm font-medium rounded-md shadow-subtle">Save Settings</button>
-                            </div>
-                        </form>
-                     </div>
+                        </div>
+                    )}
 
-                    {/* Timer Display & Controls */}
-                    <div className="text-center">
-                        <p className="text-7xl md:text-8xl font-bold text-primary-dark mb-6">{formatTime(timeLeft)}</p>
-                        <div className="flex justify-center space-x-3 sm:space-x-4">
+                    {/* Exit Fullscreen Button - Only shown IN fullscreen */}
+                    {isFullscreen && (
+                         <button
+                            onClick={onToggleFullscreen}
+                            className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-full bg-white/20 hover:bg-white/40 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background" // Added focus offset bg
+                            title="Exit Fullscreen Timer (Esc)" aria-label="Exit Fullscreen Timer"
+                         >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+                               <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+                            </svg>
+                         </button>
+                    )}
+
+
+                    {/* Settings Panel - Only shown when NOT fullscreen */}
+                    {!isFullscreen && (
+                         <div className={`settings-panel ${showSettings ? 'open' : ''}`}>
+                            <form onSubmit={saveSettings} className="space-y-3">
+                                <p className="text-sm font-medium text-text-main mb-2">Timer Durations (minutes):</p>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label htmlFor="work" className="block text-xs font-medium text-text-muted mb-1">Focus</label>
+                                        <input type="number" id="work" name="work" min="1" value={tempSettings.work} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
+                                    </div>
+                                    <div>
+                                         <label htmlFor="shortBreak" className="block text-xs font-medium text-text-muted mb-1">Short Br.</label>
+                                        <input type="number" id="shortBreak" name="shortBreak" min="1" value={tempSettings.shortBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
+                                    </div>
+                                    <div>
+                                         <label htmlFor="longBreak" className="block text-xs font-medium text-text-muted mb-1">Long Br.</label>
+                                        <input type="number" id="longBreak" name="longBreak" min="1" value={tempSettings.longBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end">
+                                    <button type="submit" className="px-4 py-1.5 bg-success hover:bg-green-600 text-white text-sm font-medium rounded-md shadow-subtle">Save Settings</button>
+                                </div>
+                            </form>
+                         </div>
+                    )}
+
+                     {/* Timer Display & Controls Wrapper */}
+                     <div className={`text-center ${isFullscreen ? 'flex flex-col items-center justify-center flex-grow' : ''}`}>
+                        {/* Timer Display */}
+                        <p className={`font-bold ${isFullscreen
+                            ? 'text-[18vw] sm:text-[15vw] md:text-12xl lg:text-14xl xl:text-16xl text-text-main leading-none'
+                            : 'text-7xl md:text-8xl text-primary-dark mb-6'
+                        }`}>
+                            {formatTime(timeLeft)}
+                        </p>
+
+                        {/* Controls */}
+                        <div className={`flex justify-center space-x-3 sm:space-x-4 ${isFullscreen ? 'mt-8 md:mt-12 scale-110' : 'mt-0'}`}>
                             <button
                                 onClick={toggleTimer}
                                 className={`px-6 py-2.5 rounded-lg font-semibold text-white text-base shadow-medium w-28 text-center ${isRunning ? 'bg-danger hover:bg-red-600' : 'bg-primary hover:bg-primary-dark'}`}
@@ -338,234 +391,133 @@
                                </svg>
                             </button>
                         </div>
-                         <p className="text-sm text-text-muted mt-6">Sessions Completed: <span className="font-semibold text-primary-darker">{Math.floor(sessionCount / 1)}</span></p>
-                    </div>
+
+                         {/* Session Count & Mode Info */}
+                        <div className={`${isFullscreen ? 'mt-6 md:mt-8 text-text-muted' : 'mt-6'}`}>
+                             {/* Mode Badge (Show in fullscreen too for context) */}
+                             {isFullscreen && (
+                                 <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${modeStyle.bg} ${modeStyle.text} mb-2`}>
+                                     {modeStyle.name}
+                                 </span>
+                             )}
+                             <p className={`text-sm ${isFullscreen ? 'text-text-muted' : 'text-text-muted'}`}>
+                                 Sessions Completed: <span className={`font-semibold ${isFullscreen ? 'text-text-main' : 'text-primary-darker'}`}>{Math.floor(sessionCount / 1)}</span>
+                            </p>
+                        </div>
+                     </div>
                 </div>
             );
         }
 
-        // 2. Session Goal Component
+        // 2. Session Goal Component (No changes needed)
         function SessionGoal() {
             const [goal, setGoal] = useLocalStorage('sessionGoal_v1', '');
             const [isEditing, setIsEditing] = useState(false);
             const [tempGoal, setTempGoal] = useState(goal);
 
             const handleEdit = () => {
-                setTempGoal(goal); // Load current goal into temp state for editing
+                setTempGoal(goal);
                 setIsEditing(true);
             };
-
             const handleSave = () => {
                 setGoal(tempGoal.trim());
                 setIsEditing(false);
             };
-
-            const handleCancel = () => {
-                setIsEditing(false);
-                 // No need to reset tempGoal here, it resets on next edit
+            const handleCancel = () => { setIsEditing(false); };
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter') { handleSave(); }
+                else if (e.key === 'Escape') { handleCancel(); }
             };
-
-             const handleKeyDown = (e) => {
-                if (e.key === 'Enter') {
-                    handleSave();
-                } else if (e.key === 'Escape') {
-                    handleCancel();
-                }
-            };
-
 
             return (
                  <div className="bg-card p-6 rounded-xl shadow-lg">
                      <h2 className="text-lg font-semibold text-text-main mb-3 flex items-center justify-between">
                          <span>🎯 Session Goal</span>
-                         {!isEditing && goal && (
-                              <button
-                                onClick={handleEdit}
-                                className="text-xs font-medium text-primary hover:text-primary-dark focus:outline-none"
-                            >
-                                Edit
-                            </button>
-                         )}
+                         {!isEditing && goal && ( <button onClick={handleEdit} className="text-xs font-medium text-primary hover:text-primary-dark focus:outline-none">Edit</button> )}
                      </h2>
                      {isEditing ? (
                          <div className="space-y-3">
-                             <input
-                                type="text"
-                                value={tempGoal}
-                                onChange={(e) => setTempGoal(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="What's your main focus?"
-                                className="w-full border border-border-color rounded px-3 py-2 text-sm"
-                                autoFocus
-                             />
+                             <input type="text" value={tempGoal} onChange={(e) => setTempGoal(e.target.value)} onKeyDown={handleKeyDown} placeholder="What's your main focus?" className="w-full border border-border-color rounded px-3 py-2 text-sm" autoFocus />
                              <div className="flex justify-end space-x-2">
-                                 <button
-                                     onClick={handleCancel}
-                                     className="px-3 py-1 text-xs font-medium text-secondary hover:text-text-main rounded bg-slate-100 hover:bg-slate-200"
-                                 >
-                                     Cancel
-                                 </button>
-                                 <button
-                                     onClick={handleSave}
-                                     className="px-3 py-1 text-xs font-medium text-white bg-success hover:bg-green-600 rounded shadow-subtle"
-                                 >
-                                     Save Goal
-                                 </button>
+                                 <button onClick={handleCancel} className="px-3 py-1 text-xs font-medium text-secondary hover:text-text-main rounded bg-slate-100 hover:bg-slate-200">Cancel</button>
+                                 <button onClick={handleSave} className="px-3 py-1 text-xs font-medium text-white bg-success hover:bg-green-600 rounded shadow-subtle">Save Goal</button>
                              </div>
                          </div>
                      ) : (
-                         goal ? (
-                             <p className="text-text-muted text-base goal-display cursor-pointer hover:text-text-main" onClick={handleEdit} title="Click to edit">
-                                 {goal}
-                             </p>
-                         ) : (
-                             <button
-                                onClick={handleEdit}
-                                className="w-full text-left p-3 bg-primary-light/20 hover:bg-primary-light/40 text-primary-darker rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                             >
-                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                 </svg>
+                         goal ? ( <p className="text-text-muted text-base goal-display cursor-pointer hover:text-text-main" onClick={handleEdit} title="Click to edit">{goal}</p> )
+                         : ( <button onClick={handleEdit} className="w-full text-left p-3 bg-primary-light/20 hover:bg-primary-light/40 text-primary-darker rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"> <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /> </svg>
                                 Set your focus for this session
-                             </button>
-                         )
+                             </button> )
                      )}
                  </div>
              );
         }
 
 
-        // 3. To-Do List Component
+        // 3. To-Do List Component (No changes needed)
         function TodoList() {
             const [tasks, setTasks] = useLocalStorage('focusDashboardTasks_v2', []);
             const [newTaskText, setNewTaskText] = useState('');
 
-            const addTask = (e) => {
-                e.preventDefault();
-                if (newTaskText.trim() === '') return;
-                const newTask = { id: Date.now(), text: newTaskText.trim(), completed: false };
-                setTasks(prevTasks => [newTask, ...prevTasks]); // Add new tasks to the top
-                setNewTaskText('');
-            };
-
-            const toggleTask = (id) => {
-                setTasks(prevTasks =>
-                    prevTasks.map(task =>
-                        task.id === id ? { ...task, completed: !task.completed } : task
-                    )
-                );
-            };
-
-            const deleteTask = (id) => {
-                setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
-            };
-
-            const clearCompleted = () => {
-                setTasks(prevTasks => prevTasks.filter(task => !task.completed));
-            };
+            const addTask = (e) => { e.preventDefault(); if (newTaskText.trim() === '') return; const newTask = { id: Date.now(), text: newTaskText.trim(), completed: false }; setTasks(prevTasks => [newTask, ...prevTasks]); setNewTaskText(''); };
+            const toggleTask = (id) => { setTasks(prevTasks => prevTasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task )); };
+            const deleteTask = (id) => { setTasks(prevTasks => prevTasks.filter(task => task.id !== id)); };
+            const clearCompleted = () => { setTasks(prevTasks => prevTasks.filter(task => !task.completed)); };
 
             const completedCount = tasks.filter(t => t.completed).length;
             const pendingCount = tasks.length - completedCount;
 
             return (
-                <div className="bg-card p-6 rounded-xl shadow-lg flex flex-col"> {/* Removed h-full */}
+                <div className="bg-card p-6 rounded-xl shadow-lg flex flex-col">
                     <div className="flex justify-between items-center mb-4">
-                         <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-                           ✅ To-Do List
-                        </h2>
-                        {tasks.length > 0 && (
-                             <span className="text-xs font-medium text-secondary">{pendingCount} pending</span>
-                        )}
+                         <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">✅ To-Do List</h2>
+                        {tasks.length > 0 && ( <span className="text-xs font-medium text-secondary">{pendingCount} pending</span> )}
                     </div>
                     <form onSubmit={addTask} className="flex mb-4">
-                        <input
-                            type="text"
-                            value={newTaskText}
-                            onChange={(e) => setNewTaskText(e.target.value)}
-                            placeholder="Add a new task..."
-                            className="flex-grow border border-border-color rounded-l-md px-3 py-2 text-sm"
-                        />
-                        <button
-                            type="submit"
-                            className="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-r-md text-sm shadow-subtle"
-                        >
-                            Add
-                        </button>
+                        <input type="text" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} placeholder="Add a new task..." className="flex-grow border border-border-color rounded-l-md px-3 py-2 text-sm" />
+                        <button type="submit" className="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-r-md text-sm shadow-subtle">Add</button>
                     </form>
-                    <ul className="space-y-2 flex-grow overflow-y-auto pr-1 min-h-[200px] max-h-[40vh] mb-4"> {/* Max height + Scroll */}
-                        {tasks.length === 0 && (
-                             <p className="text-text-muted text-center py-8 text-sm">List is empty. Add tasks above!</p>
-                        )}
+                    <ul className="space-y-2 flex-grow overflow-y-auto pr-1 min-h-[200px] max-h-[40vh] mb-4">
+                        {tasks.length === 0 && ( <p className="text-text-muted text-center py-8 text-sm">List is empty. Add tasks above!</p> )}
                         {tasks.map(task => (
                             <li key={task.id} className={`task-item flex items-center justify-between p-3 rounded-md bg-card-alt hover:bg-slate-200 ${task.completed ? 'opacity-60' : ''}`}>
                                 <div className="flex items-center space-x-3 overflow-hidden mr-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={task.completed}
-                                        onChange={() => toggleTask(task.id)}
-                                        className="form-checkbox flex-shrink-0 h-5 w-5 text-primary rounded focus:ring-primary-light border-slate-400 cursor-pointer"
-                                    />
-                                    <span className={`text-text-main text-sm ${task.completed ? 'line-through text-text-muted' : ''}`}>
-                                        {task.text}
-                                    </span>
+                                    <input type="checkbox" checked={task.completed} onChange={() => toggleTask(task.id)} className="form-checkbox flex-shrink-0 h-5 w-5 text-primary rounded focus:ring-primary-light border-slate-400 cursor-pointer" />
+                                    <span className={`text-text-main text-sm ${task.completed ? 'line-through text-text-muted' : ''}`}>{task.text}</span>
                                 </div>
-                                <button
-                                    onClick={() => deleteTask(task.id)}
-                                    className="text-danger hover:text-red-700 font-semibold text-xs opacity-50 hover:opacity-100 flex-shrink-0 ml-2"
-                                    aria-label="Delete task"
-                                >
-                                    ✕
-                                </button>
+                                <button onClick={() => deleteTask(task.id)} className="text-danger hover:text-red-700 font-semibold text-xs opacity-50 hover:opacity-100 flex-shrink-0 ml-2" aria-label="Delete task">✕</button>
                             </li>
                         ))}
                     </ul>
                     {completedCount > 0 && (
-                         <div className="mt-auto text-right border-t border-border-color pt-3"> {/* Push to bottom */}
-                             <button
-                                onClick={clearCompleted}
-                                className="text-xs font-medium text-secondary hover:text-danger"
-                             >
-                                Clear {completedCount} Completed Task{completedCount > 1 ? 's' : ''}
-                            </button>
+                         <div className="mt-auto text-right border-t border-border-color pt-3">
+                             <button onClick={clearCompleted} className="text-xs font-medium text-secondary hover:text-danger">Clear {completedCount} Completed Task{completedCount > 1 ? 's' : ''}</button>
                          </div>
                     )}
                 </div>
             );
         }
 
-        // 4. Quick Notes Component
+        // 4. Quick Notes Component (No changes needed)
         function QuickNotes() {
             const [notes, setNotes] = useLocalStorage('focusDashboardNotes_v2', '');
 
             return (
                 <div className="bg-card p-6 rounded-xl shadow-lg">
-                    <h2 className="text-lg font-semibold text-text-main mb-3 flex items-center gap-2">
-                        📝 Quick Notes
-                    </h2>
-                    <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Jot down quick thoughts or ideas here..."
-                        className="w-full h-36 border border-border-color rounded-md p-3 text-sm resize-none"
-                        aria-label="Quick Notes"
-                    />
+                    <h2 className="text-lg font-semibold text-text-main mb-3 flex items-center gap-2">📝 Quick Notes</h2>
+                    <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Jot down quick thoughts or ideas here..." className="w-full h-36 border border-border-color rounded-md p-3 text-sm resize-none" aria-label="Quick Notes" />
                      <p className="text-xs text-text-muted mt-2 text-right italic">Notes are saved automatically.</p>
                 </div>
             );
         }
 
 
-        // 5. Motivational Quote Component
+        // 5. Motivational Quote Component (No changes needed)
         function MotivationalQuote() {
             const [quote, setQuote] = useState(null);
-
-            useEffect(() => {
-                const randomIndex = Math.floor(Math.random() * quotes.length);
-                setQuote(quotes[randomIndex]);
-            }, []);
-
+            useEffect(() => { const randomIndex = Math.floor(Math.random() * quotes.length); setQuote(quotes[randomIndex]); }, []);
             if (!quote) return null;
-
             return (
                 <div className="bg-gradient-to-r from-primary-dark to-primary-darker p-6 rounded-xl shadow-lg text-white text-center">
                     <blockquote className="text-lg italic mb-2">"{quote.text}"</blockquote>
@@ -577,19 +529,49 @@
         // --- Main App Component ---
         function App() {
             const [isFocusMode, setIsFocusMode] = useLocalStorage('focusDashboardFocusMode_v1', false);
+            // State for timer fullscreen mode
+            const [isTimerFullscreen, setIsTimerFullscreen] = useState(false);
 
             const toggleFocusMode = () => setIsFocusMode(prev => !prev);
 
-            // Request notification permission on initial load if needed
+            // Callback to toggle timer fullscreen state
+            const toggleTimerFullscreen = useCallback(() => {
+                setIsTimerFullscreen(prev => !prev);
+            }, []);
+
+            // Effect to handle Escape key for exiting timer fullscreen
+            useEffect(() => {
+                const handleKeyDown = (event) => {
+                    if (event.key === 'Escape' && isTimerFullscreen) {
+                        toggleTimerFullscreen();
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => { window.removeEventListener('keydown', handleKeyDown); };
+            }, [isTimerFullscreen, toggleTimerFullscreen]); // Add dependencies
+
+             // Request notification permission on initial load if needed
              useEffect(() => {
                 if ('Notification' in window && Notification.permission === 'default') {
-                    // Consider adding a small, non-intrusive button/message asking the user first
-                    // before calling requestPermission() directly on load.
-                    // Example: console.log("Notifications available. Ask user if they want alerts.");
+                    // Consider adding a UI element to trigger this instead of on load
+                    // console.log("Notifications available. Ask user if they want alerts.");
+                    // Notification.requestPermission(); // Example if you want to ask immediately
                 }
             }, []);
 
+            // Conditional rendering based on timer fullscreen state
+            if (isTimerFullscreen) {
+                return (
+                    <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
+                         <PomodoroTimer
+                             isFullscreen={true}
+                             onToggleFullscreen={toggleTimerFullscreen}
+                         />
+                    </div>
+                );
+            }
 
+            // Default rendering
             return (
                 <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 transition-colors duration-300">
                     <header className="max-w-7xl mx-auto mb-8 md:mb-12 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -607,7 +589,7 @@
                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                              </svg>
-                            {isFocusMode ? 'Standard View' : 'Focus Mode'} {/* Changed label */}
+                            {isFocusMode ? 'Standard View' : 'Focus Mode'}
                          </button>
                     </header>
 
@@ -615,7 +597,11 @@
 
                         {/* Column 1 */}
                         <div className="space-y-6 md:space-y-8">
-                            <PomodoroTimer />
+                            {/* Pass fullscreen state and toggle function */}
+                             <PomodoroTimer
+                                 isFullscreen={false} // Always false in normal view
+                                 onToggleFullscreen={toggleTimerFullscreen}
+                             />
                             {!isFocusMode && <SessionGoal />}
                         </div>
 
@@ -648,7 +634,7 @@
 
         // --- Render the App ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(App)); // Use React.createElement for robustness
+        root.render(React.createElement(App));
 
     </script>
 
