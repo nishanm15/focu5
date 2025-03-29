@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>focu5 🚀</title>
+    <title>focu5 🚀 </title>
     <!-- React & ReactDOM CDN -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
@@ -11,39 +11,51 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Custom Tailwind Configuration -->
+    <!-- Custom Tailwind Configuration - Midnight Blue Theme -->
     <script>
         tailwind.config = {
+            darkMode: 'media', // Or 'class' if you prefer manual toggling
             theme: {
                 extend: {
                     colors: {
-                        'primary': {
-                            light: '#67e8f9', // cyan-300
-                            DEFAULT: '#06b6d4', // cyan-500
-                            dark: '#0891b2', // cyan-600
-                            darker: '#0e7490', // cyan-700
+                        // Midnight Blue Palette
+                        'primary': { // Main Accent (Vibrant Blue)
+                          light: '#60a5fa', // blue-400
+                          DEFAULT: '#3b82f6', // blue-500
+                          dark: '#2563eb', // blue-600
                         },
-                        'secondary': '#64748b', // slate-500
-                        'accent': '#f59e0b', // amber-500
+                        'secondary': '#475569', // slate-600 (Slightly lighter secondary for dark)
+                        'accent': '#f59e0b', // amber-500 (Keep yellow accent)
                         'danger': '#ef4444', // red-500
                         'success': '#22c55e', // green-500
                         'warning': '#f59e0b', // amber-500 (using accent)
-                        'info': '#3b82f6', // blue-500
-                        'background': '#f8fafc', // slate-50 (very light grey/off-white)
-                        'card': '#ffffff', // white
-                        'card-alt': '#f1f5f9', // slate-100 (slightly grey card bg)
-                        'text-main': '#1e293b', // slate-800
-                        'text-muted': '#64748b', // slate-500
-                        'text-light': '#f8fafc', // slate-50 (for dark backgrounds)
-                        'border-color': '#e2e8f0', // slate-200 (lighter border)
+                        'info': '#3b82f6', // blue-500 (using primary)
+
+                        // Backgrounds
+                        'background': '#0f172a', // slate-900 (Main dark background)
+                        'card': '#1e293b', // slate-800 (Slightly lighter card bg)
+                        'card-alt': '#334155', // slate-700 (Alternative darker elements/hover)
+                        'fullscreen-bg': '#020617', // slate-950 (Very dark for fullscreen)
+
+                        // Text
+                        'text-main': '#e2e8f0', // slate-200 (Primary light text)
+                        'text-muted': '#94a3b8', // slate-400 (Secondary/muted light text)
+                        'text-dark': '#0f172a', // slate-900 (For light backgrounds like buttons)
+                        'text-on-primary': '#ffffff', // White text on primary buttons
+
+                        // Borders
+                        'border-color': '#334155', // slate-700 (Subtle dark border)
+                        'border-accent': '#475569', // slate-600 (Slightly more visible border)
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
                     boxShadow: {
-                        'subtle': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
-                        'medium': '0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07)', // Softer shadow
-                        'lg': '0 15px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08)', // Slightly larger soft shadow
+                        // Adjusted for dark theme - often using lighter colors or glows is better
+                        'subtle': '0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3)',
+                        'medium': '0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4)',
+                        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4)',
+                        'focus-ring': '0 0 0 3px rgba(59, 130, 246, 0.4)', // blue-500 with alpha
                     },
                     borderRadius: {
                         'xl': '0.75rem', // 12px
@@ -53,12 +65,12 @@
                         'height': 'height',
                         'spacing': 'margin, padding',
                     },
-                     // Add responsive text sizes for fullscreen timer
-                    fontSize: {
-                        '10xl': '10rem',
-                        '12xl': '12rem',
-                        '14xl': '14rem',
-                        '16xl': '16rem',
+                    fontSize: { // Keep fullscreen sizes
+                        '10xl': '10rem', '12xl': '12rem', '14xl': '14rem', '16xl': '16rem',
+                    },
+                    // Add subtle gradient for quote maybe
+                    backgroundImage: {
+                         'quote-gradient': 'linear-gradient(to right, #1e40af, #1d4ed8)', // Example blue gradient
                     },
                 }
             }
@@ -69,8 +81,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: tailwind.config.theme.extend.colors.background;
-            color: tailwind.config.theme.extend.colors['text-main'];
+            background-color: tailwind.config.theme.extend.colors.background; /* slate-900 */
+            color: tailwind.config.theme.extend.colors['text-main']; /* slate-200 */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -78,55 +90,47 @@
         button, input, textarea, select, .task-item, .goal-display {
             transition: all 0.2s ease-in-out;
         }
+        /* Task Completed Style */
         .task-item.completed span {
              text-decoration: line-through;
-             color: #94a3b8; /* slate-400 */
+             color: tailwind.config.theme.extend.colors['text-muted']; /* slate-400 */
         }
-        /* Scrollbar styling */
+        /* Scrollbar styling - Dark Theme */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; } /* slate-100 */
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; } /* slate-300 */
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; } /* slate-400 */
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; } /* slate-800 */
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; } /* slate-600 */
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; } /* slate-500 */
 
         /* Settings Panel Animation */
         .settings-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out;
-            padding-top: 0;
-            padding-bottom: 0;
-            margin-bottom: 0;
-            border-top: 0px solid transparent; /* Prepare for transition */
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out;
+            padding-top: 0; padding-bottom: 0; margin-bottom: 0; border-top: 0px solid transparent;
         }
         .settings-panel.open {
-             max-height: 300px; /* Adjust if more settings are added */
-             padding-top: 1rem; /* pt-4 */
-             padding-bottom: 1rem; /* pb-4 */
-             margin-top: 1rem; /* mt-4 */
-             margin-bottom: 1rem; /* mb-4 */
-             border-top: 1px solid tailwind.config.theme.extend.colors['border-color']; /* Add separator line */
+             max-height: 300px; padding-top: 1rem; padding-bottom: 1rem; margin-top: 1rem; margin-bottom: 1rem;
+             border-top: 1px solid tailwind.config.theme.extend.colors['border-color']; /* slate-700 */
              transition: max-height 0.4s ease-in, padding 0.4s ease-in, margin 0.4s ease-in, border-top 0.4s ease-in;
         }
 
-         /* Focus mode message styling */
+         /* Focus mode message styling - Dark Theme */
          .focus-mode-indicator {
-            background-color: rgba(245, 158, 11, 0.1); /* amber-500 with alpha */
-            border-left: 4px solid #f59e0b; /* amber-500 */
-            padding: 0.75rem 1rem; /* py-3 px-4 */
-            margin-top: 1rem; /* mt-4 */
-            border-radius: 0.375rem; /* rounded-md */
-            transition: opacity 0.3s ease-in-out;
+            background-color: rgba(59, 130, 246, 0.1); /* blue-500 with alpha */
+            border-left: 4px solid #3b82f6; /* blue-500 */
+            padding: 0.75rem 1rem; margin-top: 1rem; border-radius: 0.375rem; transition: opacity 0.3s ease-in-out;
          }
-          /* Input focus state */
+          /* Input focus state - Dark Theme */
         input[type="text"]:focus, input[type="number"]:focus, input[type="url"]:focus, textarea:focus {
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-            border-color: tailwind.config.theme.extend.colors.primary.DEFAULT;
-            box-shadow: 0 0 0 2px tailwind.config.theme.extend.colors.primary.light;
+            outline: 2px solid transparent; outline-offset: 2px;
+            border-color: tailwind.config.theme.extend.colors.primary.DEFAULT; /* blue-500 */
+            box-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) rgba(59, 130, 246, 0.4); /* Equivalent to ring-primary/40 */
+        }
+        /* Style checkbox focus */
+        input[type="checkbox"]:focus {
+             box-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) rgba(59, 130, 246, 0.4);
         }
     </style>
 </head>
-<body>
+<body class="bg-background"> {/* Ensure body bg is set */}
     <div id="root"></div>
 
     <script type="text/babel">
@@ -140,6 +144,7 @@
         const SESSIONS_BEFORE_LONG_BREAK = 4;
 
         const quotes = [
+             // Quotes remain the same
              { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
              { text: "Success is not final, failure is not fatal: It is the courage to continue that counts.", author: "Winston Churchill" },
              { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
@@ -151,257 +156,110 @@
         ];
 
         // --- Helper Functions ---
-        const formatTime = (seconds) => {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        };
+        const formatTime = (seconds) => { /* No change needed */ const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; };
 
-        // Custom Hook for Local Storage
-        const useLocalStorage = (key, initialValue) => {
-            const [storedValue, setStoredValue] = useState(() => {
-                try {
-                    const item = window.localStorage.getItem(key);
-                    return item ? JSON.parse(item) : initialValue;
-                } catch (error) {
-                    console.error("Error reading localStorage key “"+key+"”:", error);
-                    return initialValue;
-                }
-            });
-
-            const setValue = (value) => {
-                try {
-                    const valueToStore = value instanceof Function ? value(storedValue) : value;
-                    setStoredValue(valueToStore);
-                    window.localStorage.setItem(key, JSON.stringify(valueToStore));
-                } catch (error) {
-                    console.error("Error setting localStorage key “"+key+"”:", error);
-                }
-            };
-            return [storedValue, setValue];
-        };
+        // Custom Hook for Local Storage (No change needed)
+        const useLocalStorage = (key, initialValue) => { const [storedValue, setStoredValue] = useState(() => { try { const item = window.localStorage.getItem(key); return item ? JSON.parse(item) : initialValue; } catch (error) { console.error("Error reading localStorage key “"+key+"”:", error); return initialValue; } }); const setValue = (value) => { try { const valueToStore = value instanceof Function ? value(storedValue) : value; setStoredValue(valueToStore); window.localStorage.setItem(key, JSON.stringify(valueToStore)); } catch (error) { console.error("Error setting localStorage key “"+key+"”:", error); } }; return [storedValue, setValue]; };
 
         // --- Components ---
 
-        // 1. Pomodoro Timer Component
-        // Added isFullscreen and onToggleFullscreen props
+        // 1. Pomodoro Timer Component (Updated Styling)
         function PomodoroTimer({ isFullscreen, onToggleFullscreen }) {
-            const [settings, setSettings] = useLocalStorage('pomodoroSettings_v2', {
-                work: DEFAULT_WORK_MINUTES,
-                shortBreak: DEFAULT_SHORT_BREAK_MINUTES,
-                longBreak: DEFAULT_LONG_BREAK_MINUTES,
-            });
+            const [settings, setSettings] = useLocalStorage('pomodoroSettings_v2', { work: DEFAULT_WORK_MINUTES, shortBreak: DEFAULT_SHORT_BREAK_MINUTES, longBreak: DEFAULT_LONG_BREAK_MINUTES, });
             const [mode, setMode] = useState('work');
             const [sessionCount, setSessionCount] = useState(0);
             const [timeLeft, setTimeLeft] = useState(settings.work * 60);
             const [isRunning, setIsRunning] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
             const [tempSettings, setTempSettings] = useState(settings);
-
             const timerRef = useRef(null);
 
-            const getTimeForMode = useCallback((currentMode) => {
-                switch (currentMode) {
-                    case 'shortBreak': return settings.shortBreak * 60;
-                    case 'longBreak': return settings.longBreak * 60;
-                    case 'work':
-                    default: return settings.work * 60;
-                }
-            }, [settings]);
-
-            useEffect(() => {
-                if (!isRunning) {
-                    setTimeLeft(getTimeForMode(mode));
-                }
-                 // If settings change while timer is paused, update the displayed time
-                if (!isRunning && !isFullscreen) { // Don't reset time if entering/exiting fullscreen paused
-                    setTimeLeft(getTimeForMode(mode));
-                }
-            }, [settings, mode, getTimeForMode]); // Removed isRunning dependency to allow settings update while paused
-
-             // Separate useEffect for timer logic
-            useEffect(() => {
-                if (isRunning && timeLeft > 0) {
-                    timerRef.current = setInterval(() => {
-                        setTimeLeft(prevTime => Math.max(0, prevTime - 1));
-                    }, 1000);
-                } else if (timeLeft === 0 && isRunning) {
-                    clearInterval(timerRef.current);
-                    setIsRunning(false);
-
-                    try { /* Audio Notification */
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain();
-                        oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.8);
-                        oscillator.connect(gainNode); gainNode.connect(audioContext.destination); oscillator.start(); oscillator.stop(audioContext.currentTime + 0.8);
-                    } catch (e) { console.warn("Audio notification failed:", e); }
-
-                    let nextMode = ''; let nextSessionCount = sessionCount;
-                    if (mode === 'work') {
-                        nextSessionCount++;
-                        nextMode = (nextSessionCount > 0 && nextSessionCount % SESSIONS_BEFORE_LONG_BREAK === 0) ? 'longBreak' : 'shortBreak';
-                    } else { nextMode = 'work'; }
-                    setSessionCount(nextSessionCount); setMode(nextMode);
-                    setTimeLeft(getTimeForMode(nextMode)); // Set time for next mode
-
-                    const modeName = nextMode === 'work' ? 'Work Session' : nextMode === 'shortBreak' ? 'Short Break' : 'Long Break';
-                    if (Notification.permission === "granted") { /* Browser Notification */
-                        new Notification("Pomodoro Complete!", { body: `Time for your ${modeName}.`, icon: "https://img.icons8.com/fluency/48/timer.png", });
-                    } else {
-                        alert(`Time for your ${modeName}!`);
-                        if (Notification.permission === "default") { Notification.requestPermission(); }
-                    }
-                }
-                return () => clearInterval(timerRef.current);
-            }, [isRunning, timeLeft, mode, sessionCount, getTimeForMode, settings]); // Keep dependencies here
+            const getTimeForMode = useCallback((currentMode) => { /* No change needed */ switch (currentMode) { case 'shortBreak': return settings.shortBreak * 60; case 'longBreak': return settings.longBreak * 60; case 'work': default: return settings.work * 60; } }, [settings]);
+            useEffect(() => { /* No change needed */ if (!isRunning) { setTimeLeft(getTimeForMode(mode)); } if (!isRunning && !isFullscreen) { setTimeLeft(getTimeForMode(mode)); } }, [settings, mode, getTimeForMode]);
+            useEffect(() => { /* Notification logic remains same */ if (isRunning && timeLeft > 0) { timerRef.current = setInterval(() => { setTimeLeft(prevTime => Math.max(0, prevTime - 1)); }, 1000); } else if (timeLeft === 0 && isRunning) { clearInterval(timerRef.current); setIsRunning(false); try { const audioContext = new (window.AudioContext || window.webkitAudioContext)(); const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain(); oscillator.type = 'triangle'; oscillator.frequency.setValueAtTime(623.25, audioContext.currentTime); gainNode.gain.setValueAtTime(0.25, audioContext.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.8); oscillator.connect(gainNode); gainNode.connect(audioContext.destination); oscillator.start(); oscillator.stop(audioContext.currentTime + 0.8); } catch (e) { console.warn("Audio notification failed:", e); } let nextMode = ''; let nextSessionCount = sessionCount; if (mode === 'work') { nextSessionCount++; nextMode = (nextSessionCount > 0 && nextSessionCount % SESSIONS_BEFORE_LONG_BREAK === 0) ? 'longBreak' : 'shortBreak'; } else { nextMode = 'work'; } setSessionCount(nextSessionCount); setMode(nextMode); setTimeLeft(getTimeForMode(nextMode)); const modeName = nextMode === 'work' ? 'Focus Session' : nextMode === 'shortBreak' ? 'Short Break' : 'Long Break'; if (Notification.permission === "granted") { new Notification("Pomodoro Complete!", { body: `Time for your ${modeName}.`, icon: "https://img.icons8.com/fluency/48/timer.png", }); } else { alert(`Time for your ${modeName}!`); if (Notification.permission === "default") { Notification.requestPermission(); } } } return () => clearInterval(timerRef.current); }, [isRunning, timeLeft, mode, sessionCount, getTimeForMode, settings]);
 
             const toggleTimer = () => setIsRunning(!isRunning);
             const resetTimer = () => { clearInterval(timerRef.current); setIsRunning(false); setTimeLeft(getTimeForMode(mode)); };
-            const skipSession = () => {
-                clearInterval(timerRef.current); setIsRunning(false); let nextMode = ''; let nextSessionCount = sessionCount;
-                if (mode === 'work') { nextSessionCount++; nextMode = (nextSessionCount > 0 && nextSessionCount % SESSIONS_BEFORE_LONG_BREAK === 0) ? 'longBreak' : 'shortBreak'; }
-                else { nextMode = 'work'; }
-                setSessionCount(nextSessionCount); setMode(nextMode); setTimeLeft(getTimeForMode(nextMode));
-            };
+            const skipSession = () => { clearInterval(timerRef.current); setIsRunning(false); let nextMode = ''; let nextSessionCount = sessionCount; if (mode === 'work') { nextSessionCount++; nextMode = (nextSessionCount > 0 && nextSessionCount % SESSIONS_BEFORE_LONG_BREAK === 0) ? 'longBreak' : 'shortBreak'; } else { nextMode = 'work'; } setSessionCount(nextSessionCount); setMode(nextMode); setTimeLeft(getTimeForMode(nextMode)); };
             const handleSettingsChange = (e) => { const { name, value } = e.target; const intValue = Math.max(1, parseInt(value, 10) || 1); setTempSettings(prev => ({ ...prev, [name]: intValue })); };
             const saveSettings = (e) => { e.preventDefault(); setSettings(tempSettings); setShowSettings(false); if (!isRunning) { setTimeLeft(getTimeForMode(mode)); } };
 
+            // --- Dark Theme Mode Styling ---
             const getModeStyling = () => {
                  switch(mode) {
-                    case 'shortBreak': return { name: 'Short Break', bg: 'bg-green-100', text: 'text-green-700', border: 'border-success' };
-                    case 'longBreak': return { name: 'Long Break', bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-info' };
+                    case 'shortBreak': return { name: 'Short Break', bg: 'bg-emerald-900/50', text: 'text-emerald-300', border: 'border-success' }; // Adjusted bg
+                    case 'longBreak': return { name: 'Long Break', bg: 'bg-sky-900/50', text: 'text-sky-300', border: 'border-info' }; // Adjusted bg
                     case 'work':
-                    default: return { name: 'Focus Session', bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-warning' };
+                    default: return { name: 'Focus Session', bg: 'bg-amber-900/50', text: 'text-amber-300', border: 'border-warning' }; // Adjusted bg
                  }
             };
             const modeStyle = getModeStyling();
 
             return (
-                 // Conditional wrapper styling based on fullscreen state
-                <div className={`${!isFullscreen ? `bg-card p-6 rounded-xl shadow-lg border-t-4 ${modeStyle.border}` : 'w-full h-full flex flex-col items-center justify-center relative'}`}>
+                <div className={`${!isFullscreen ? `bg-card border border-border-color p-6 rounded-xl shadow-lg border-t-4 ${modeStyle.border}` : 'bg-fullscreen-bg w-full h-full flex flex-col items-center justify-center relative'}`}>
 
-                    {/* Header - Only shown when NOT fullscreen */}
                     {!isFullscreen && (
                         <div className={`flex justify-between items-center mb-4`}>
-                            {/* Mode Badge */}
                             <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${modeStyle.bg} ${modeStyle.text}`}>
                                 {modeStyle.name}
                             </span>
-                            {/* Settings and Fullscreen Buttons */}
                             <div className="flex items-center gap-2">
-                                {/* Fullscreen Button (Enter) */}
-                                <button
-                                    onClick={onToggleFullscreen}
-                                    className="text-secondary hover:text-primary p-1 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2"
-                                    title="Fullscreen Timer" aria-label="Fullscreen Timer"
-                                >
-                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m4.5 4.5h-4.5m4.5 0v4.5m0-4.5L15 15" />
-                                     </svg>
+                                <button onClick={onToggleFullscreen} className="text-text-muted hover:text-primary p-1.5 rounded-full hover:bg-card-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card" title="Fullscreen Timer" aria-label="Fullscreen Timer">
+                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"> <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m4.5 4.5h-4.5m4.5 0v4.5m0-4.5L15 15" /> </svg>
                                 </button>
-                                {/* Settings Button */}
-                                <button
-                                    onClick={() => setShowSettings(!showSettings)}
-                                    className="text-secondary hover:text-primary p-1 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2"
-                                    title="Timer Settings" aria-label="Timer Settings"
-                                >
-                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.004.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 1.905c-.007.378.138.75.431.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.293-.24.438.613.431-.992a6.759 6.759 0 0 1 0-1.905c.007-.378-.138-.75-.431-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                   </svg>
+                                <button onClick={() => setShowSettings(!showSettings)} className="text-text-muted hover:text-primary p-1.5 rounded-full hover:bg-card-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card" title="Timer Settings" aria-label="Timer Settings">
+                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"> <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.004.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 1.905c-.007.378.138.75.431.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.293-.24.438.613.431-.992a6.759 6.759 0 0 1 0-1.905c.007-.378-.138-.75-.431-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" /> <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /> </svg>
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {/* Exit Fullscreen Button - Only shown IN fullscreen */}
                     {isFullscreen && (
-                         <button
-                            onClick={onToggleFullscreen}
-                            className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-full bg-white/20 hover:bg-white/40 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background" // Added focus offset bg
-                            title="Exit Fullscreen Timer (Esc)" aria-label="Exit Fullscreen Timer"
-                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
-                               <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
-                            </svg>
+                         <button onClick={onToggleFullscreen} className="absolute top-5 right-5 text-slate-400 hover:text-slate-200 p-2 rounded-full bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-fullscreen-bg" title="Exit Fullscreen Timer (Esc)" aria-label="Exit Fullscreen Timer">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7"> <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" /> </svg>
                          </button>
                     )}
 
-
-                    {/* Settings Panel - Only shown when NOT fullscreen */}
                     {!isFullscreen && (
                          <div className={`settings-panel ${showSettings ? 'open' : ''}`}>
                             <form onSubmit={saveSettings} className="space-y-3">
                                 <p className="text-sm font-medium text-text-main mb-2">Timer Durations (minutes):</p>
                                 <div className="grid grid-cols-3 gap-3">
-                                    <div>
-                                        <label htmlFor="work" className="block text-xs font-medium text-text-muted mb-1">Focus</label>
-                                        <input type="number" id="work" name="work" min="1" value={tempSettings.work} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
-                                    </div>
-                                    <div>
-                                         <label htmlFor="shortBreak" className="block text-xs font-medium text-text-muted mb-1">Short Br.</label>
-                                        <input type="number" id="shortBreak" name="shortBreak" min="1" value={tempSettings.shortBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
-                                    </div>
-                                    <div>
-                                         <label htmlFor="longBreak" className="block text-xs font-medium text-text-muted mb-1">Long Br.</label>
-                                        <input type="number" id="longBreak" name="longBreak" min="1" value={tempSettings.longBreak} onChange={handleSettingsChange} className="w-full border border-border-color rounded px-2 py-1.5 text-sm"/>
-                                    </div>
+                                    {/* Use dark inputs */}
+                                    <div> <label htmlFor="work" className="block text-xs font-medium text-text-muted mb-1">Focus</label> <input type="number" id="work" name="work" min="1" value={tempSettings.work} onChange={handleSettingsChange} className="w-full bg-card-alt border border-border-accent rounded px-2 py-1.5 text-sm text-text-main placeholder-text-muted"/> </div>
+                                    <div> <label htmlFor="shortBreak" className="block text-xs font-medium text-text-muted mb-1">Short Br.</label> <input type="number" id="shortBreak" name="shortBreak" min="1" value={tempSettings.shortBreak} onChange={handleSettingsChange} className="w-full bg-card-alt border border-border-accent rounded px-2 py-1.5 text-sm text-text-main placeholder-text-muted"/> </div>
+                                    <div> <label htmlFor="longBreak" className="block text-xs font-medium text-text-muted mb-1">Long Br.</label> <input type="number" id="longBreak" name="longBreak" min="1" value={tempSettings.longBreak} onChange={handleSettingsChange} className="w-full bg-card-alt border border-border-accent rounded px-2 py-1.5 text-sm text-text-main placeholder-text-muted"/> </div>
                                 </div>
-                                <div className="flex justify-end">
-                                    <button type="submit" className="px-4 py-1.5 bg-success hover:bg-green-600 text-white text-sm font-medium rounded-md shadow-subtle">Save Settings</button>
+                                <div className="flex justify-end pt-2">
+                                    <button type="submit" className="px-4 py-1.5 bg-success hover:bg-green-600 text-white text-sm font-medium rounded-md shadow-subtle focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-card">Save Settings</button>
                                 </div>
                             </form>
                          </div>
                     )}
 
-                     {/* Timer Display & Controls Wrapper */}
                      <div className={`text-center ${isFullscreen ? 'flex flex-col items-center justify-center flex-grow' : ''}`}>
-                        {/* Timer Display */}
-                        <p className={`font-bold ${isFullscreen
-                            ? 'text-[18vw] sm:text-[15vw] md:text-12xl lg:text-14xl xl:text-16xl text-text-main leading-none'
-                            : 'text-7xl md:text-8xl text-primary-dark mb-6'
-                        }`}>
+                        <p className={`font-bold ${isFullscreen ? 'text-[18vw] sm:text-[15vw] md:text-12xl lg:text-14xl xl:text-16xl text-slate-100 leading-none' : 'text-7xl md:text-8xl text-primary mb-6' }`}>
                             {formatTime(timeLeft)}
                         </p>
 
-                        {/* Controls */}
                         <div className={`flex justify-center space-x-3 sm:space-x-4 ${isFullscreen ? 'mt-8 md:mt-12 scale-110' : 'mt-0'}`}>
-                            <button
-                                onClick={toggleTimer}
-                                className={`px-6 py-2.5 rounded-lg font-semibold text-white text-base shadow-medium w-28 text-center ${isRunning ? 'bg-danger hover:bg-red-600' : 'bg-primary hover:bg-primary-dark'}`}
-                            >
+                             {/* Dark Theme Buttons */}
+                            <button onClick={toggleTimer} className={`px-6 py-2.5 rounded-lg font-semibold text-text-on-primary text-base shadow-medium w-28 text-center ${isRunning ? 'bg-danger hover:bg-red-600 focus:ring-red-500' : 'bg-primary hover:bg-primary-dark focus:ring-primary'} focus:outline-none focus:ring-2 focus:ring-offset-2 ${isFullscreen ? 'focus:ring-offset-fullscreen-bg' : 'focus:ring-offset-card'}`}>
                                 {isRunning ? 'Pause' : 'Start'}
                             </button>
-                            <button
-                                onClick={resetTimer}
-                                className="px-6 py-2.5 rounded-lg font-semibold bg-secondary hover:bg-slate-600 text-white text-base shadow-medium"
-                            >
+                            <button onClick={resetTimer} className={`px-6 py-2.5 rounded-lg font-semibold bg-secondary hover:bg-slate-500 text-text-on-primary text-base shadow-medium focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 ${isFullscreen ? 'focus:ring-offset-fullscreen-bg' : 'focus:ring-offset-card'}`}>
                                 Reset
                             </button>
-                             <button
-                                onClick={skipSession}
-                                title="Skip to next session"
-                                className="px-4 py-2.5 rounded-lg font-semibold bg-accent hover:bg-amber-600 text-white text-base shadow-medium"
-                            >
-                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 inline-block -mr-1">
-                                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                               </svg>
-                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 inline-block -ml-2">
-                                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                               </svg>
+                             <button onClick={skipSession} title="Skip to next session" className={`px-4 py-2.5 rounded-lg font-semibold bg-accent hover:bg-amber-600 text-white text-base shadow-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${isFullscreen ? 'focus:ring-offset-fullscreen-bg' : 'focus:ring-offset-card'}`}>
+                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 inline-block -mr-1"> <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /> </svg>
+                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 inline-block -ml-2"> <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /> </svg>
                             </button>
                         </div>
 
-                         {/* Session Count & Mode Info */}
                         <div className={`${isFullscreen ? 'mt-6 md:mt-8 text-text-muted' : 'mt-6'}`}>
-                             {/* Mode Badge (Show in fullscreen too for context) */}
-                             {isFullscreen && (
-                                 <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${modeStyle.bg} ${modeStyle.text} mb-2`}>
-                                     {modeStyle.name}
-                                 </span>
-                             )}
-                             <p className={`text-sm ${isFullscreen ? 'text-text-muted' : 'text-text-muted'}`}>
-                                 Sessions Completed: <span className={`font-semibold ${isFullscreen ? 'text-text-main' : 'text-primary-darker'}`}>{Math.floor(sessionCount / 1)}</span>
+                             {isFullscreen && ( <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${modeStyle.bg} ${modeStyle.text} mb-2`}> {modeStyle.name} </span> )}
+                             <p className={`text-sm ${isFullscreen ? 'text-slate-400' : 'text-text-muted'}`}>
+                                 Sessions Completed: <span className={`font-semibold ${isFullscreen ? 'text-slate-200' : 'text-primary-dark'}`}>{Math.floor(sessionCount / 1)}</span>
                             </p>
                         </div>
                      </div>
@@ -409,43 +267,35 @@
             );
         }
 
-        // 2. Session Goal Component (No changes needed)
+        // 2. Session Goal Component (Updated Styling)
         function SessionGoal() {
             const [goal, setGoal] = useLocalStorage('sessionGoal_v1', '');
             const [isEditing, setIsEditing] = useState(false);
             const [tempGoal, setTempGoal] = useState(goal);
-
-            const handleEdit = () => {
-                setTempGoal(goal);
-                setIsEditing(true);
-            };
-            const handleSave = () => {
-                setGoal(tempGoal.trim());
-                setIsEditing(false);
-            };
+            const handleEdit = () => { setTempGoal(goal); setIsEditing(true); };
+            const handleSave = () => { setGoal(tempGoal.trim()); setIsEditing(false); };
             const handleCancel = () => { setIsEditing(false); };
-            const handleKeyDown = (e) => {
-                if (e.key === 'Enter') { handleSave(); }
-                else if (e.key === 'Escape') { handleCancel(); }
-            };
+            const handleKeyDown = (e) => { if (e.key === 'Enter') { handleSave(); } else if (e.key === 'Escape') { handleCancel(); } };
 
             return (
-                 <div className="bg-card p-6 rounded-xl shadow-lg">
+                 <div className="bg-card border border-border-color p-6 rounded-xl shadow-lg">
                      <h2 className="text-lg font-semibold text-text-main mb-3 flex items-center justify-between">
                          <span>🎯 Session Goal</span>
-                         {!isEditing && goal && ( <button onClick={handleEdit} className="text-xs font-medium text-primary hover:text-primary-dark focus:outline-none">Edit</button> )}
+                         {!isEditing && goal && ( <button onClick={handleEdit} className="text-xs font-medium text-primary hover:text-primary-light focus:outline-none focus:ring-1 focus:ring-primary rounded">Edit</button> )}
                      </h2>
                      {isEditing ? (
                          <div className="space-y-3">
-                             <input type="text" value={tempGoal} onChange={(e) => setTempGoal(e.target.value)} onKeyDown={handleKeyDown} placeholder="What's your main focus?" className="w-full border border-border-color rounded px-3 py-2 text-sm" autoFocus />
+                             {/* Dark Input */}
+                             <input type="text" value={tempGoal} onChange={(e) => setTempGoal(e.target.value)} onKeyDown={handleKeyDown} placeholder="What's your main focus?" className="w-full bg-card-alt border border-border-accent rounded px-3 py-2 text-sm text-text-main placeholder-text-muted" autoFocus />
                              <div className="flex justify-end space-x-2">
-                                 <button onClick={handleCancel} className="px-3 py-1 text-xs font-medium text-secondary hover:text-text-main rounded bg-slate-100 hover:bg-slate-200">Cancel</button>
-                                 <button onClick={handleSave} className="px-3 py-1 text-xs font-medium text-white bg-success hover:bg-green-600 rounded shadow-subtle">Save Goal</button>
+                                 {/* Dark Buttons */}
+                                 <button onClick={handleCancel} className="px-3 py-1 text-xs font-medium text-text-muted hover:text-text-main rounded bg-card-alt hover:bg-slate-600">Cancel</button>
+                                 <button onClick={handleSave} className="px-3 py-1 text-xs font-medium text-white bg-success hover:bg-green-600 rounded shadow-subtle focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-card">Save Goal</button>
                              </div>
                          </div>
                      ) : (
                          goal ? ( <p className="text-text-muted text-base goal-display cursor-pointer hover:text-text-main" onClick={handleEdit} title="Click to edit">{goal}</p> )
-                         : ( <button onClick={handleEdit} className="w-full text-left p-3 bg-primary-light/20 hover:bg-primary-light/40 text-primary-darker rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                         : ( <button onClick={handleEdit} className="w-full text-left p-3 bg-primary/10 hover:bg-primary/20 text-primary-light rounded-lg text-sm font-medium flex items-center justify-center gap-2">
                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"> <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /> </svg>
                                 Set your focus for this session
                              </button> )
@@ -454,167 +304,123 @@
              );
         }
 
-
-        // 3. To-Do List Component (No changes needed)
+        // 3. To-Do List Component (Updated Styling)
         function TodoList() {
             const [tasks, setTasks] = useLocalStorage('focusDashboardTasks_v2', []);
             const [newTaskText, setNewTaskText] = useState('');
-
             const addTask = (e) => { e.preventDefault(); if (newTaskText.trim() === '') return; const newTask = { id: Date.now(), text: newTaskText.trim(), completed: false }; setTasks(prevTasks => [newTask, ...prevTasks]); setNewTaskText(''); };
             const toggleTask = (id) => { setTasks(prevTasks => prevTasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task )); };
             const deleteTask = (id) => { setTasks(prevTasks => prevTasks.filter(task => task.id !== id)); };
             const clearCompleted = () => { setTasks(prevTasks => prevTasks.filter(task => !task.completed)); };
-
-            const completedCount = tasks.filter(t => t.completed).length;
-            const pendingCount = tasks.length - completedCount;
+            const completedCount = tasks.filter(t => t.completed).length; const pendingCount = tasks.length - completedCount;
 
             return (
-                <div className="bg-card p-6 rounded-xl shadow-lg flex flex-col">
+                <div className="bg-card border border-border-color p-6 rounded-xl shadow-lg flex flex-col">
                     <div className="flex justify-between items-center mb-4">
                          <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">✅ To-Do List</h2>
                         {tasks.length > 0 && ( <span className="text-xs font-medium text-secondary">{pendingCount} pending</span> )}
                     </div>
                     <form onSubmit={addTask} className="flex mb-4">
-                        <input type="text" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} placeholder="Add a new task..." className="flex-grow border border-border-color rounded-l-md px-3 py-2 text-sm" />
-                        <button type="submit" className="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-r-md text-sm shadow-subtle">Add</button>
+                        {/* Dark Input */}
+                        <input type="text" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} placeholder="Add a new task..." className="flex-grow bg-card-alt border border-border-accent rounded-l-md px-3 py-2 text-sm text-text-main placeholder-text-muted focus:border-primary" />
+                        <button type="submit" className="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-r-md text-sm shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-card">Add</button>
                     </form>
                     <ul className="space-y-2 flex-grow overflow-y-auto pr-1 min-h-[200px] max-h-[40vh] mb-4">
-                        {tasks.length === 0 && ( <p className="text-text-muted text-center py-8 text-sm">List is empty. Add tasks above!</p> )}
+                        {tasks.length === 0 && ( <p className="text-text-muted text-center py-8 text-sm">No tasks yet. Add one!</p> )}
                         {tasks.map(task => (
-                            <li key={task.id} className={`task-item flex items-center justify-between p-3 rounded-md bg-card-alt hover:bg-slate-200 ${task.completed ? 'opacity-60' : ''}`}>
+                            <li key={task.id} className={`task-item flex items-center justify-between p-3 rounded-md bg-card-alt hover:bg-slate-600 ${task.completed ? 'opacity-50' : ''}`}>
                                 <div className="flex items-center space-x-3 overflow-hidden mr-2">
-                                    <input type="checkbox" checked={task.completed} onChange={() => toggleTask(task.id)} className="form-checkbox flex-shrink-0 h-5 w-5 text-primary rounded focus:ring-primary-light border-slate-400 cursor-pointer" />
+                                     {/* Dark theme checkbox */}
+                                    <input type="checkbox" checked={task.completed} onChange={() => toggleTask(task.id)} className="form-checkbox flex-shrink-0 h-5 w-5 text-primary rounded bg-slate-600 border-slate-500 focus:ring-primary focus:ring-offset-card-alt cursor-pointer" />
                                     <span className={`text-text-main text-sm ${task.completed ? 'line-through text-text-muted' : ''}`}>{task.text}</span>
                                 </div>
-                                <button onClick={() => deleteTask(task.id)} className="text-danger hover:text-red-700 font-semibold text-xs opacity-50 hover:opacity-100 flex-shrink-0 ml-2" aria-label="Delete task">✕</button>
+                                <button onClick={() => deleteTask(task.id)} className="text-danger hover:text-red-400 font-semibold text-xs opacity-40 hover:opacity-100 flex-shrink-0 ml-2 focus:outline-none focus:ring-1 focus:ring-danger rounded" aria-label="Delete task">✕</button>
                             </li>
                         ))}
                     </ul>
                     {completedCount > 0 && (
                          <div className="mt-auto text-right border-t border-border-color pt-3">
-                             <button onClick={clearCompleted} className="text-xs font-medium text-secondary hover:text-danger">Clear {completedCount} Completed Task{completedCount > 1 ? 's' : ''}</button>
+                             <button onClick={clearCompleted} className="text-xs font-medium text-secondary hover:text-danger focus:outline-none focus:ring-1 focus:ring-danger rounded">Clear {completedCount} Completed</button>
                          </div>
                     )}
                 </div>
             );
         }
 
-        // 4. Quick Notes Component (No changes needed)
+        // 4. Quick Notes Component (Updated Styling)
         function QuickNotes() {
             const [notes, setNotes] = useLocalStorage('focusDashboardNotes_v2', '');
 
             return (
-                <div className="bg-card p-6 rounded-xl shadow-lg">
+                <div className="bg-card border border-border-color p-6 rounded-xl shadow-lg">
                     <h2 className="text-lg font-semibold text-text-main mb-3 flex items-center gap-2">📝 Quick Notes</h2>
-                    <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Jot down quick thoughts or ideas here..." className="w-full h-36 border border-border-color rounded-md p-3 text-sm resize-none" aria-label="Quick Notes" />
+                    {/* Dark Textarea */}
+                    <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Jot down quick thoughts or ideas here..." className="w-full h-36 bg-card-alt border border-border-accent rounded-md p-3 text-sm resize-none text-text-main placeholder-text-muted focus:border-primary" aria-label="Quick Notes" />
                      <p className="text-xs text-text-muted mt-2 text-right italic">Notes are saved automatically.</p>
                 </div>
             );
         }
 
 
-        // 5. Motivational Quote Component (No changes needed)
+        // 5. Motivational Quote Component (Updated Styling)
         function MotivationalQuote() {
             const [quote, setQuote] = useState(null);
             useEffect(() => { const randomIndex = Math.floor(Math.random() * quotes.length); setQuote(quotes[randomIndex]); }, []);
             if (!quote) return null;
             return (
-                <div className="bg-gradient-to-r from-primary-dark to-primary-darker p-6 rounded-xl shadow-lg text-white text-center">
-                    <blockquote className="text-lg italic mb-2">"{quote.text}"</blockquote>
-                    <cite className="text-sm opacity-70">- {quote.author}</cite>
+                 // Use a subtle dark gradient or solid color
+                <div className="bg-gradient-to-r from-slate-800 to-slate-700 border border-border-color p-6 rounded-xl shadow-lg text-text-main text-center">
+                    <blockquote className="text-lg italic mb-2 text-slate-300">"{quote.text}"</blockquote>
+                    <cite className="text-sm text-slate-400">- {quote.author}</cite>
                 </div>
             );
         }
 
-        // --- Main App Component ---
+        // --- Main App Component (Updated Styling) ---
         function App() {
             const [isFocusMode, setIsFocusMode] = useLocalStorage('focusDashboardFocusMode_v1', false);
-            // State for timer fullscreen mode
             const [isTimerFullscreen, setIsTimerFullscreen] = useState(false);
-
             const toggleFocusMode = () => setIsFocusMode(prev => !prev);
+            const toggleTimerFullscreen = useCallback(() => { setIsTimerFullscreen(prev => !prev); }, []);
 
-            // Callback to toggle timer fullscreen state
-            const toggleTimerFullscreen = useCallback(() => {
-                setIsTimerFullscreen(prev => !prev);
-            }, []);
+            useEffect(() => { const handleKeyDown = (event) => { if (event.key === 'Escape' && isTimerFullscreen) { toggleTimerFullscreen(); } }; window.addEventListener('keydown', handleKeyDown); return () => { window.removeEventListener('keydown', handleKeyDown); }; }, [isTimerFullscreen, toggleTimerFullscreen]);
+            useEffect(() => { if ('Notification' in window && Notification.permission === 'default') { /* console.log("Notify available"); */ } }, []);
 
-            // Effect to handle Escape key for exiting timer fullscreen
-            useEffect(() => {
-                const handleKeyDown = (event) => {
-                    if (event.key === 'Escape' && isTimerFullscreen) {
-                        toggleTimerFullscreen();
-                    }
-                };
-                window.addEventListener('keydown', handleKeyDown);
-                return () => { window.removeEventListener('keydown', handleKeyDown); };
-            }, [isTimerFullscreen, toggleTimerFullscreen]); // Add dependencies
-
-             // Request notification permission on initial load if needed
-             useEffect(() => {
-                if ('Notification' in window && Notification.permission === 'default') {
-                    // Consider adding a UI element to trigger this instead of on load
-                    // console.log("Notifications available. Ask user if they want alerts.");
-                    // Notification.requestPermission(); // Example if you want to ask immediately
-                }
-            }, []);
-
-            // Conditional rendering based on timer fullscreen state
             if (isTimerFullscreen) {
-                return (
-                    <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
-                         <PomodoroTimer
-                             isFullscreen={true}
-                             onToggleFullscreen={toggleTimerFullscreen}
-                         />
-                    </div>
-                );
+                return ( <div className="fixed inset-0 z-50 bg-fullscreen-bg flex items-center justify-center"> <PomodoroTimer isFullscreen={true} onToggleFullscreen={toggleTimerFullscreen} /> </div> );
             }
 
-            // Default rendering
             return (
                 <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 transition-colors duration-300">
                     <header className="max-w-7xl mx-auto mb-8 md:mb-12 flex flex-col sm:flex-row justify-between items-center gap-4">
                          <div>
-                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-darker text-center sm:text-left">
+                             {/* Dark Theme Header */}
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary text-center sm:text-left">
                                🚀 focu5
                             </h1>
-                            <p className="text-secondary text-sm sm:text-base mt-1 text-center sm:text-left">Your dedicated space for productivity.</p>
+                            <p className="text-text-muted text-sm sm:text-base mt-1 text-center sm:text-left">Your midnight productivity zone.</p>
                          </div>
-                         <button
-                             onClick={toggleFocusMode}
-                             title={isFocusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
-                             className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-medium whitespace-nowrap ${isFocusMode ? 'bg-accent text-white hover:bg-amber-600' : 'bg-card text-secondary hover:bg-slate-100 border border-border-color'}`}
-                         >
-                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-                             </svg>
+                         <button onClick={toggleFocusMode} title={isFocusMode ? "Exit Focus Mode" : "Enter Focus Mode"} className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${isFocusMode ? 'bg-accent text-white hover:bg-amber-600 focus:ring-accent' : 'bg-card text-text-muted hover:bg-card-alt border border-border-color focus:ring-primary'}`} >
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"> <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /> </svg>
                             {isFocusMode ? 'Standard View' : 'Focus Mode'}
                          </button>
                     </header>
 
                     <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
 
-                        {/* Column 1 */}
                         <div className="space-y-6 md:space-y-8">
-                            {/* Pass fullscreen state and toggle function */}
-                             <PomodoroTimer
-                                 isFullscreen={false} // Always false in normal view
-                                 onToggleFullscreen={toggleTimerFullscreen}
-                             />
+                             <PomodoroTimer isFullscreen={false} onToggleFullscreen={toggleTimerFullscreen} />
                             {!isFocusMode && <SessionGoal />}
                         </div>
 
-                        {/* Column 2 */}
                         <div className="space-y-6 md:space-y-8">
                              <TodoList />
                             {!isFocusMode && <QuickNotes />}
                         </div>
 
-                        {/* Full width bottom section */}
                         <div className="lg:col-span-2 mt-2">
                             {isFocusMode ? (
-                                <div className="focus-mode-indicator text-center text-sm font-medium text-amber-700">
+                                <div className="focus-mode-indicator text-center text-sm font-medium text-blue-300"> {/* Dark theme focus indicator */}
                                      🎯 Focus Mode Active: Minimal interface for concentration.
                                 </div>
                             ) : (
@@ -625,8 +431,8 @@
                     </main>
 
                     <footer className="text-center text-text-muted mt-16 text-xs sm:text-sm">
-                        <p>© {new Date().getFullYear()} focu5. Keep up the great work!</p>
-                        <p className="mt-1">Data is stored locally in your browser via localStorage.</p>
+                        <p>© {new Date().getFullYear()} focu5. Power through the night!</p>
+                        <p className="mt-1 opacity-70">Data is stored locally in your browser via localStorage.</p>
                     </footer>
                 </div>
             );
